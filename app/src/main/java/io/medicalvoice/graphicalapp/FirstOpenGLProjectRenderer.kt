@@ -43,13 +43,13 @@ class FirstOpenGLProjectRenderer : GLSurfaceView.Renderer {
         val triangle1VerticesData = floatArrayOf( // X, Y, Z,
             // R, G, B, A
             -0.5f, -0.25f, 0.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
+            1.0f, 1.0f, 0.65f, 1.0f,
 
-            0.0f, -0.25f, 0.0f,
-            0.8f, 0.8f, 1.0f, 1.0f,
+            0.0f, -0.5f, 0.0f,
+            0.8f, 0.13f, 1.0f, 1.0f,
 
-            0.0f, 0.56f, 0.0f,
-            0.8f, 0.8f, 1.0f, 1.0f,
+            0.3f, 0.56f, 0.0f,
+            0.1f, 0.6f, 0.31f, 1.0f,
         )
         mTriangle1Vertices = ByteBuffer.allocateDirect(triangle1VerticesData.size * mBytesPerFloat)
             .order(ByteOrder.nativeOrder()).asFloatBuffer()
