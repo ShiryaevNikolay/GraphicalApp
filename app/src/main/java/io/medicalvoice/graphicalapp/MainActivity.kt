@@ -1,39 +1,39 @@
 package io.medicalvoice.graphicalapp
 
-import android.app.Activity
-import android.app.ActivityManager
-import android.opengl.GLSurfaceView
 import android.os.Bundle
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
+import io.medicalvoice.graphicalapp.databinding.ActivityMainBinding
 
-class MainActivity : Activity() {
-    private var glSurfaceView: GLSurfaceView? = null
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
+    private val viewPagerAdapter: FragmentStateAdapter = ViewPagerAdapter(this)
+
+    private val viewPagerListener = object : ViewPager2.OnPageChangeCallback() {
+        override fun onPageSelected(position: Int) {
+            val title = when(OpenGlFragments.get(position)) {
+                OpenGlFragments.LIGHTING -> "Освещение"
+                OpenGlFragments.LIGHTING_TEXTURES -> "Текстурное освещение"
+            }
+            binding.toolbar.title = title
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (!supportES2()) {
-            Toast.makeText(this, "OpenGL ES 2.0 is not supported", Toast.LENGTH_LONG).show()
-            finish()
-            return
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        initViews()
+    }
+
+    private fun initViews() = with(binding) {
+        viewPager2.apply {
+            adapter = viewPagerAdapter
+            registerOnPageChangeCallback(viewPagerListener)
         }
-        glSurfaceView = GLSurfaceView(this)
-        glSurfaceView!!.setEGLContextClientVersion(2)
-        glSurfaceView!!.setRenderer(OpenGLRenderer(this))
-        setContentView(glSurfaceView)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        glSurfaceView!!.onPause()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        glSurfaceView!!.onResume()
-    }
-
-    private fun supportES2(): Boolean {
-        val activityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        val configurationInfo = activityManager.deviceConfigurationInfo
-        return configurationInfo.reqGlEsVersion >= 0x20000
     }
 }

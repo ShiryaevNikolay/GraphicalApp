@@ -1,4 +1,4 @@
-package io.medicalvoice.graphicalapp;
+package io.medicalvoice.graphicalapp.lighttexture.texture;
 
 import java.nio.FloatBuffer;
 import android.opengl.GLES20;

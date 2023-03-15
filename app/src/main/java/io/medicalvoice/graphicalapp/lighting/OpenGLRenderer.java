@@ -1,4 +1,4 @@
-package io.medicalvoice.graphicalapp;
+package io.medicalvoice.graphicalapp.lighting;
 
 import android.opengl.GLSurfaceView;
 
@@ -10,6 +10,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+import java.nio.ShortBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 import android.content.Context;
@@ -42,7 +45,6 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer
     private FloatBuffer colorBuffer;
     //шейдерный объект
     private Shader mShader;
-    private Texture mTexture0, mTexture1;
 
     //конструктор
     public OpenGLRenderer(Context context) {
@@ -184,92 +186,41 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer
                 GLES20.GL_GENERATE_MIPMAP_HINT, GLES20.GL_NICEST);
         //записываем код вершинного шейдера в виде строки
         String vertexShaderCode=
-                "uniform mat4 u_modelViewProjectionMatrix;\n" +
-                "attribute vec3 a_vertex;\n" +
-                "attribute vec3 a_normal;\n" +
-                "attribute vec4 a_color;\n" +
-                "varying vec3 v_vertex;\n" +
-                "varying vec3 v_normal;\n" +
-                "varying vec4 v_color;\n" +
-                "// определяем переменные для передачи \n" +
-                "// координат двух текстур на интерполяцию\n" +
-                "varying vec2 v_texcoord0;\n" +
-                "varying vec2 v_texcoord1;\n" +
-                "void main() {\n" +
-                "        v_vertex=a_vertex;\n" +
-                "        vec3 n_normal=normalize(a_normal);\n" +
-                "        v_normal=n_normal;\n" +
-                "        v_color=a_color;\n" +
-                "        //вычисляем координаты первой текстуры и отравляем их на интерполяцию\n" +
-                "        //пусть координата текстуры S будет равна координате вершины X\n" +
-                "        v_texcoord0.s=a_vertex.x;\n" +
-                "        //а координата текстуры T будет равна координате вершины Z\n" +
-                "        v_texcoord0.t=a_vertex.z;\n" +
-                "        gl_Position = u_modelViewProjectionMatrix * vec4(a_vertex,1.0);"+
-                "}";
+                "uniform mat4 u_modelViewProjectionMatrix;"+
+                        "attribute vec3 a_vertex;"+
+                        "attribute vec3 a_normal;"+
+                        "attribute vec4 a_color;"+
+                        "varying vec3 v_vertex;"+
+                        "varying vec3 v_normal;"+
+                        "varying vec4 v_color;"+
+                        "void main() {"+
+                        "v_vertex=a_vertex;"+
+                        "vec3 n_normal=normalize(a_normal);"+
+                        "v_normal=n_normal;"+
+                        "v_color=a_color;"+
+                        "gl_Position = u_modelViewProjectionMatrix * vec4(a_vertex,1.0);"+
+                        "}";
         //записываем код фрагментного шейдера в виде строки
         String fragmentShaderCode=
-                        "precision mediump float;\n" +
-                        "uniform vec3 u_camera;\n" +
-                        "uniform vec3 u_lightPosition;\n" +
-                        "uniform sampler2D u_texture0;\n" +
-                        "uniform sampler2D u_texture1;\n" +
-                        "varying vec3 v_vertex;\n" +
-                        "varying vec3 v_normal;\n" +
-                        "varying vec4 v_color;\n" +
-                        "// принимаем координат двух текстур после интерполяции\n" +
-                        "varying vec2 v_texcoord0;\n" +
-                        "varying vec2 v_texcoord1;\n" +
-                        "void main() {\n" +
-                        "       vec3 n_normal=normalize(v_normal);\n" +
-                        "       vec3 lightvector = normalize(u_lightPosition - v_vertex);\n" +
-                        "       vec3 lookvector = normalize(u_camera - v_vertex);\n" +
-                        "       float ambient=0.2;\n" +
-                        "       float k_diffuse=0.8;\n" +
-                        "       float k_specular=0.4;\n" +
-                        "       float diffuse = k_diffuse * max(dot(n_normal, lightvector), 0.0);\n" +
-                        "       vec3 reflectvector = reflect(-lightvector, n_normal);\n" +
-                        "       float specular = k_specular * pow( max(dot(lookvector,reflectvector),0.0), 40.0 );\n" +
-                        "      vec4 one=vec4(1.0,1.0,1.0,1.0);\n" +
-                      /*  "      //оставим пока квадрат временно без освещения и наложем текстуру\n" +
-                        "      //вычисляем цвет пикселя для первой текстуры\n" +
-                        " vec4 textureColor0=texture2D(u_texture0, v_texcoord0);\n" +
-                        "      //и присвоим его системной переменной gl_FragColor\n" +
-                        "      gl_FragColor =textureColor0;"+"}";*/
-                      /*  "      //оставим пока квадрат временно без освещения и наложем 2 текстуры\n" +
-                " //вычисляем координаты первой текстуры\n" +
-                        "      float r = v_vertex.x * v_vertex.x + v_vertex.z * v_vertex.z;\n" +
-                        "      vec2 texcoord0 = 0.3 * r * v_vertex.xz;\n" +
-                        "      //вычисляем цвет пикселя для первой текстуры\n" +
-                        "      vec4 textureColor0=texture2D(u_texture0, texcoord0);\n" +
-                        "      //и присвоим его системной переменной gl_FragColor\n" +
-                        "      gl_FragColor =textureColor0;"+"}";
-                        */
-                        "      //оставим пока квадрат временно без освещения и выполним смешивание текстуры\n" +
-                      " //вычисляем координаты первой текстуры\n" +
-                        "      float r = v_vertex.x * v_vertex.x + v_vertex.z * v_vertex.z;\n" +
-                        "      vec2 texcoord0 = 0.3 * r * v_vertex.xz;\n" +
-                        "      //вычисляем цвет пикселя для первой текстуры\n" +
-                        "      vec4 textureColor0=texture2D(u_texture0, texcoord0);\n" +
-                        "\n" +
-                        "      //вычисляем координаты второй текстуры\n" +
-                        "      //пусть они будут пропорциональны координатам пикселя\n" +
-                        "      //подберем коэффициенты так, \n" +
-                        "      //чтобы вторая текстура заполнила весь квадрат\n" +
-                        "      vec2 texcoord1=0.25*(v_vertex.xz-2.0);\n" +
-                        "      //вычисляем цвет пикселя для второй текстуры\n" +
-                        "      vec4 textureColor1=texture2D(u_texture1, texcoord1);\n" +
-                        "\n" +
-                        "      //умножим цвета первой и второй текстур\n" +
-                        "      //gl_FragColor =textureColor0*textureColor1;\n" +
-                        "      gl_FragColor=2.0*(ambient+diffuse)*mix(textureColor0,textureColor1,0.5)+specular*one;"+
+                "precision mediump float;"+
+                        "uniform vec3 u_camera;"+
+                        "uniform vec3 u_lightPosition;"+
+                        "varying vec3 v_vertex;"+
+                        "varying vec3 v_normal;"+
+                        "varying vec4 v_color;"+
+                        "void main() {"+
+                        "vec3 n_normal=normalize(v_normal);"+
+                        "vec3 lightvector = normalize(u_lightPosition - v_vertex);"+
+                        "vec3 lookvector = normalize(u_camera - v_vertex);"+
+                        "float ambient=0.2;"+
+                        "float k_diffuse=0.8;"+
+                        "float k_specular=0.4;"+
+                        "float diffuse = k_diffuse * max(dot(n_normal, lightvector), 0.0);"+
+                        "vec3 reflectvector = reflect(-lightvector, n_normal);"+
+                        "float specular = k_specular * pow( max(dot(lookvector,reflectvector),0.0), 40.0 );"+
+                        "vec4 one=vec4(1.0,1.0,1.0,1.0);"+
+                        "gl_FragColor = (ambient+diffuse+specular)*one;"+
                         "}";
-
-
-        //создаем текстурные объекты из картинок
-        mTexture0=new Texture(context,R.drawable.box);
-        mTexture1=new Texture(context,R.drawable.picture1);
-
         //создадим шейдерный объект
         mShader=new Shader(vertexShaderCode, fragmentShaderCode);
         //свяжем буфер вершин с атрибутом a_vertex в вершинном шейдере
@@ -278,11 +229,8 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer
         mShader.linkNormalBuffer(normalBuffer);
         //свяжем буфер цветов с атрибутом a_color в вершинном шейдере
         mShader.linkColorBuffer(colorBuffer);
-        // свяжем текстурные объекты с сэмплерами в фрагментном шейдере
-        mShader.linkTexture(mTexture0, mTexture1);
         //связь атрибутов с буферами сохраняется до тех пор,
         //пока не будет уничтожен шейдерный объект
-
     }
 
     //метод, в котором выполняется рисование кадра

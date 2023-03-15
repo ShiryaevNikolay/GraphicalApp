@@ -1,8 +1,9 @@
-package io.medicalvoice.graphicalapp;
+package io.medicalvoice.graphicalapp.lighttexture.shader;
 
-import android.opengl.GLSurfaceView;
 import java.nio.FloatBuffer;
 import android.opengl.GLES20;
+
+import io.medicalvoice.graphicalapp.lighttexture.texture.Texture;
 
 public class Shader {
 
@@ -124,7 +125,7 @@ public class Shader {
     public void useProgram(){
         GLES20.glUseProgram(program_Handle);
     }
-    public void linkTexture(Texture texture0,Texture texture1){
+    public void linkTexture(Texture texture0, Texture texture1){
         // texture0, texture1 - текстурные объекты
         //устанавливаем текущую активную программу
         GLES20.glUseProgram(program_Handle);
