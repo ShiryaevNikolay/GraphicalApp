@@ -219,7 +219,7 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer
                         "vec3 reflectvector = reflect(-lightvector, n_normal);"+
                         "float specular = k_specular * pow( max(dot(lookvector,reflectvector),0.0), 40.0 );"+
                         "vec4 one=vec4(1.0,1.0,1.0,1.0);"+
-                        "gl_FragColor = (ambient+diffuse+specular)*one;"+
+                        "gl_FragColor = (ambient+diffuse+specular)*one*v_color;"+
                         "}";
         //создадим шейдерный объект
         mShader=new Shader(vertexShaderCode, fragmentShaderCode);

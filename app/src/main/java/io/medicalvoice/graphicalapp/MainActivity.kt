@@ -15,6 +15,7 @@ class MainActivity : AppCompatActivity() {
     private val viewPagerListener = object : ViewPager2.OnPageChangeCallback() {
         override fun onPageSelected(position: Int) {
             val title = when(OpenGlFragments.get(position)) {
+                OpenGlFragments.CUBE -> "Куб"
                 OpenGlFragments.LIGHTING -> "Освещение"
                 OpenGlFragments.LIGHTING_TEXTURES -> "Текстурное освещение"
             }

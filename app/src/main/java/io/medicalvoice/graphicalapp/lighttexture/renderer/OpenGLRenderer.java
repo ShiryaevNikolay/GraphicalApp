@@ -203,9 +203,11 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer
                 "        v_color=a_color;\n" +
                 "        //вычисляем координаты первой текстуры и отравляем их на интерполяцию\n" +
                 "        //пусть координата текстуры S будет равна координате вершины X\n" +
-                "        v_texcoord0.s=a_vertex.x;\n" +
+                "        //v_texcoord0.s=a_vertex.x;\n" +
                 "        //а координата текстуры T будет равна координате вершины Z\n" +
-                "        v_texcoord0.t=a_vertex.z;\n" +
+                "        //v_texcoord0.t=a_vertex.z;\n" +
+                "        float r = a_vertex.x * a_vertex.x + a_vertex.z * a_vertex.z;\n" +
+                "        v_texcoord0 = 0.3 * r * a_vertex.xz;\n" +
                 "        gl_Position = u_modelViewProjectionMatrix * vec4(a_vertex,1.0);"+
                 "}";
         //записываем код фрагментного шейдера в виде строки
@@ -263,7 +265,10 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer
                         "\n" +
                         "      //умножим цвета первой и второй текстур\n" +
                         "      //gl_FragColor =textureColor0*textureColor1;\n" +
-                        "      gl_FragColor=2.0*(ambient+diffuse)*mix(textureColor0,textureColor1,0.5)+specular*one;"+
+                        "      //gl_FragColor =mix(textureColor0, textureColor1, 0.5);\n" +
+                        "      //gl_FragColor =abs(textureColor0-textureColor1);\n" +
+                        "      gl_FragColor.r=abs (textureColor0.g-textureColor1.b);\n" +
+                        "      //gl_FragColor=2.0*(ambient+diffuse)*mix(textureColor0,textureColor1,0.5)+specular*one;\n"+
                         "}";
 
 
