@@ -1,6 +1,8 @@
 package io.medicalvoice.graphicalapp
 
 enum class OpenGlFragments {
+    SCENE_2D,
+    SHIP,
     CUBE,
     LIGHTING,
     LIGHTING_TEXTURES;
