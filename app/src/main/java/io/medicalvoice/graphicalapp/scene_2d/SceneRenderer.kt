@@ -12,6 +12,7 @@ import io.medicalvoice.graphicalapp.scene_2d.data.scene.Ground
 import io.medicalvoice.graphicalapp.scene_2d.data.scene.Roof
 import io.medicalvoice.graphicalapp.scene_2d.data.scene.Sky
 import io.medicalvoice.graphicalapp.scene_2d.data.scene.Wall
+import io.medicalvoice.graphicalapp.scene_2d.texture.Texture
 import io.medicalvoice.graphicalapp.utils.FileUtils
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -45,6 +46,9 @@ class SceneRenderer(private val context: Context) : Renderer {
     private var groundShader: Shader? = null
     private var wallShader: Shader? = null
     private var roofShader: Shader? = null
+
+    // Текстуры
+    private var groundTexture: Texture? = null
 
     init {
         light = Light(
@@ -103,6 +107,11 @@ class SceneRenderer(private val context: Context) : Renderer {
         // Если какая-то часть грани находится на пределами экрана,
         // то НЕ будет отображаться вся грань
         // GLES20.glEnable(GLES20.GL_CULL_FACE)
+        //включаем сглаживание текстур, это пригодится в будущем
+        GLES20.glHint(GLES20.GL_GENERATE_MIPMAP_HINT, GLES20.GL_NICEST)
+
+        //создаем текстурные объекты из картинок
+        groundTexture = Texture(context, R.drawable.tex_ground)
 
         val vertexShaderString = FileUtils.readTextFromRaw(
             context,
@@ -112,15 +121,25 @@ class SceneRenderer(private val context: Context) : Renderer {
             context,
             R.raw.scene_2d_fragment_shader
         )
+        val textureVertexShaderString = FileUtils.readTextFromRaw(
+            context,
+            R.raw.scene_2d_texture_vertex_shader
+        )
+        val textureFragmentShaderString = FileUtils.readTextFromRaw(
+            context,
+            R.raw.scene_2d_texture_fragment_shader
+        )
         skyShader = Shader(vertexShaderString, fragmentShaderString).apply {
             normalBuffer?.let { linkNormalBuffer(it, "a_normal") }
             linkVertexBuffer(sky.getVertexBuffer(), "a_vertex")
             linkColorBuffer(sky.getColorBuffer(), "a_color")
         }
-        groundShader = Shader(vertexShaderString, fragmentShaderString).apply {
+        groundShader = Shader(textureVertexShaderString, textureFragmentShaderString).apply {
             normalBuffer?.let { linkNormalBuffer(it, "a_normal") }
             linkVertexBuffer(ground.getVertexBuffer(), "a_vertex")
             linkColorBuffer(ground.getColorBuffer(), "a_color")
+            // свяжем текстурные объекты с сэмплерами в фрагментном шейдере
+            groundTexture?.let { linkTexture(it, "u_texture") }
         }
         wallShader = Shader(vertexShaderString, fragmentShaderString).apply {
             normalBuffer?.let { linkNormalBuffer(it, "a_normal") }

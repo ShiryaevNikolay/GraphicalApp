@@ -3,6 +3,7 @@ package io.medicalvoice.graphicalapp.scene_2d
 import android.opengl.GLES20
 import io.medicalvoice.graphicalapp.scene_2d.data.Camera
 import io.medicalvoice.graphicalapp.scene_2d.data.Light
+import io.medicalvoice.graphicalapp.scene_2d.texture.Texture
 import java.nio.FloatBuffer
 
 class Shader(
@@ -89,6 +90,27 @@ class Shader(
         val uniformId = GLES20.glGetUniformLocation(programId, uniform)
         // связываем координаты источника света с униформой
         GLES20.glUniform3f(uniformId, light.position.x, light.position.y, light.position.z)
+    }
+
+    /**
+     * Связывает текстуру с униформой
+     *
+     * @param texture текстура
+     * @param uniform униформа
+     */
+    fun linkTexture(texture: Texture, uniform: String) {
+        // устанавливаем активную программу
+        GLES20.glUseProgram(programId)
+        // получаем ссылку на униформу
+        val uniformId = GLES20.glGetUniformLocation(programId, uniform)
+        // выбираем текущий текстурный блок GL_TEXTURE0
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+        // в текстурном блоке GL_TEXTURE0
+        // делаем активной текстуру с именем texture.getName()
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture.getName())
+        // выполняем связь между объектом texture и униформой
+        // в нулевом текстурном блоке
+        GLES20.glUniform1i(uniformId, 0)
     }
 
     /**
