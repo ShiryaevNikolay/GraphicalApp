@@ -267,8 +267,8 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer
                         "      //gl_FragColor =textureColor0*textureColor1;\n" +
                         "      //gl_FragColor =mix(textureColor0, textureColor1, 0.5);\n" +
                         "      //gl_FragColor =abs(textureColor0-textureColor1);\n" +
-                        "      gl_FragColor.r=abs (textureColor0.g-textureColor1.b);\n" +
-                        "      //gl_FragColor=2.0*(ambient+diffuse)*mix(textureColor0,textureColor1,0.5)+specular*one;\n"+
+                        "      //gl_FragColor.r=abs (textureColor0.g-textureColor1.b);\n" +
+                        "      gl_FragColor=2.0*(ambient+diffuse)*mix(textureColor0,textureColor1,0.5)+specular*one;\n"+
                         "}";
 
 

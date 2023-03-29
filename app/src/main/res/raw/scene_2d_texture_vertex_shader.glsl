@@ -25,7 +25,9 @@ void main() {
     //v_texcoord0.t=a_vertex.z;
 
     float r = a_vertex.x * a_vertex.x + a_vertex.y * a_vertex.y;
-    v_texcoord = 0.3 * r * a_vertex.xy;
+    // TODO: В этом случае получается странный эфект растягивания текстуры
+//    v_texcoord = 0.1 * r * a_vertex.xy;
+    v_texcoord = a_vertex.xy;
 
     gl_Position = u_modelViewProjectionMatrix * vec4(a_vertex, 1.0);
 }
