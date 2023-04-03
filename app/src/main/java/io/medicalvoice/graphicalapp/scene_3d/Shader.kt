@@ -56,7 +56,7 @@ class Shader(
     private fun drawElements(mode: Int, type: Int, indexesBuffer: Buffer) = withCurrentProgram {
         GLES20.glDrawElements(
             mode,
-            indexesBuffer.limit(), // TODO: Нужно ли делить размер на 3? Тут кому-то помогло https://gamedev.stackexchange.com/questions/85924/obj-model-not-being-rendered-properly-in-opengl-es-2-android-app
+            indexesBuffer.limit(),
             type,
             indexesBuffer
         )
