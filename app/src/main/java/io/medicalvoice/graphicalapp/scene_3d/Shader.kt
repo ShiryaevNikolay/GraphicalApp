@@ -1,6 +1,8 @@
 package io.medicalvoice.graphicalapp.scene_3d
 
 import android.opengl.GLES20
+import io.medicalvoice.graphicalapp.scene_3d.data.Camera
+import io.medicalvoice.graphicalapp.scene_3d.data.Coordinates
 import java.nio.Buffer
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
@@ -26,6 +28,42 @@ class Shader(
         linkBuffer(vertexBuffer, attribute, 3)
     }
 
+    /**
+     * Связывает буфер координат векторов нормалей с аттрибутом
+     *
+     * @param normalBuffer буфер координат вершин нормалей
+     * @param attribute название атрибута
+     */
+    fun linkNormalBuffer(normalBuffer: FloatBuffer, attribute: String) {
+        linkBuffer(normalBuffer, attribute, 3)
+    }
+
+    /**
+     * Связывает координаты камеры с униформой
+     *
+     * @param camera камера
+     * @param uniform униформа
+     */
+    fun linkCamera(camera: Camera, uniform: String) = withCurrentProgram {
+        // получаем ссылку на униформу
+        val uniformId = GLES20.glGetUniformLocation(programId, uniform)
+        // связываем координаты камеры с униформой
+        GLES20.glUniform3f(uniformId, camera.position.x, camera.position.y, camera.position.z)
+    }
+
+    /**
+     * Связывает координаты источника света с униформой
+     *
+     * @param light источник света
+     * @param uniform униформа
+     */
+    fun linkLightSource(light: Coordinates, uniform: String) = withCurrentProgram {
+        // получаем ссылку на униформу
+        val uniformId = GLES20.glGetUniformLocation(programId, uniform)
+        // связываем координаты источника света с униформой
+        GLES20.glUniform3f(uniformId, light.x, light.y, light.z)
+    }
+
     fun getUniformId(uniform: String): Int = withCurrentProgram {
         GLES20.glGetUniformLocation(programId, uniform)
     }
@@ -37,7 +75,7 @@ class Shader(
         GLES20.glUniformMatrix4fv(objectMatrixId, 1, false, matrix, 0)
     }
 
-    fun drawElements(indexesBuffer: ShortBuffer) = withCurrentProgram {
+    fun drawElements(indexesBuffer: ShortBuffer) {
         drawElements(
             mode = GLES20.GL_TRIANGLES,
             type = GLES20.GL_UNSIGNED_SHORT,

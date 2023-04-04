@@ -5,16 +5,30 @@ import android.opengl.GLES20
 import android.opengl.GLSurfaceView.Renderer
 import android.opengl.Matrix
 import android.os.SystemClock
+import io.medicalvoice.graphicalapp.scene_3d.data.Angle
+import io.medicalvoice.graphicalapp.scene_3d.data.Camera
+import io.medicalvoice.graphicalapp.scene_3d.data.Coordinates
 import io.medicalvoice.graphicalapp.scene_3d.objects.Torus
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
 class SceneRenderer(private val context: Context) : Renderer {
 
+    // @Volatile
+    // private var angle: Float = 0.0f
+
     private val projectionMatrix = FloatArray(MATRIX_SIZE)
+    private val viewModelProjectionMatrix = FloatArray(MATRIX_SIZE)
     private val viewMatrix = FloatArray(MATRIX_SIZE)
     private val modelMatrix = FloatArray(MATRIX_SIZE)
-    private val matrix = FloatArray(MATRIX_SIZE)
+    private val viewModelMatrix = FloatArray(MATRIX_SIZE)
+
+    private val camera = Camera(
+        position = Coordinates(0.0f, 2.0f, 4.0f),
+        targetLook = Coordinates(0.0f, 0.0f, 0.0f),
+        rotate = Angle(0.0f, 1.0f, 0.0f)
+    )
+    private val light = Coordinates(1.0f, 2.0f, 1.0f)
 
     // Объекты
     private var torus: Torus? = null
@@ -46,8 +60,12 @@ class SceneRenderer(private val context: Context) : Renderer {
         // вращение
         setModelMatrix()
 
-        torus?.draw()
+        torus?.draw(camera, light)
     }
+
+    // fun rotate(angle: Float) {
+    //     this.angle += angle
+    // }
 
     private fun createObjects() {
         torus = Torus(context)
@@ -75,34 +93,36 @@ class SceneRenderer(private val context: Context) : Renderer {
     }
 
     private fun bindMatrix() {
-        Matrix.multiplyMM(matrix, 0, viewMatrix, 0, modelMatrix, 0)
-        Matrix.multiplyMM(matrix, 0, projectionMatrix, 0, matrix, 0)
-        torus?.bindMatrix(matrix)
+        Matrix.multiplyMM(viewModelMatrix, 0, viewMatrix, 0, modelMatrix, 0)
+        Matrix.multiplyMM(viewModelProjectionMatrix, 0, projectionMatrix, 0, viewModelMatrix, 0)
+        torus?.bindMatrix(viewModelProjectionMatrix)
     }
 
     private fun createViewMatrix() {
-        // точка положения камеры
-        val eyeX = 0f
-        val eyeY = 2f
-        val eyeZ = 4f
+        // // точка положения камеры
+        // val eyeX = 0f
+        // val eyeY = 2f
+        // val eyeZ = 4f
+        //
+        // // точка направления камеры
+        // val targetX = 0f
+        // val targetY = 0f
+        // val targetZ = 0f
+        //
+        // // up-вектор (angle)
+        // val upX = 0f
+        // val upY = 1f
+        // val upZ = 0f
 
-        // точка направления камеры
-        val targetX = 0f
-        val targetY = 0f
-        val targetZ = 0f
-
-        // up-вектор (angle)
-        val upX = 0f
-        val upY = 1f
-        val upZ = 0f
-
-        Matrix.setLookAtM(
-            viewMatrix,
-            0,
-            eyeX, eyeY, eyeZ,
-            targetX, targetY, targetZ,
-            upX, upY, upZ
-        )
+        with(camera) {
+            Matrix.setLookAtM(
+                viewMatrix,
+                0,
+                position.x, position.y, position.z,
+                targetLook.x, targetLook.y, targetLook.z,
+                rotate.x, rotate.y, rotate.z
+            )
+        }
     }
 
     /**

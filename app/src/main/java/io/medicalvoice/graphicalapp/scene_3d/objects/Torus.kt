@@ -4,19 +4,20 @@ import android.content.Context
 import android.opengl.GLES20
 import io.medicalvoice.graphicalapp.R
 import io.medicalvoice.graphicalapp.scene_3d.Shader
+import io.medicalvoice.graphicalapp.scene_3d.data.Camera
+import io.medicalvoice.graphicalapp.scene_3d.data.Coordinates
 import io.medicalvoice.graphicalapp.scene_3d.data.ObjectData
 import io.medicalvoice.graphicalapp.scene_3d.tools.ObjectLoader
 import io.medicalvoice.graphicalapp.utils.FileUtils
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.FloatBuffer
-import java.nio.ShortBuffer
+import java.nio.*
 
 class Torus(context: Context) : DrawObject, BindObject {
 
     private val objectData: ObjectData
 
     private val vertexesBuffer: FloatBuffer
+    private val normalsBuffer: FloatBuffer
+    // private val texturesBuffer: FloatBuffer
     private val indexesBuffer: ShortBuffer
 
     private val shader: Shader
@@ -26,18 +27,10 @@ class Torus(context: Context) : DrawObject, BindObject {
     init {
         objectData = ObjectLoader(context, "torus.obj").getData()
 
-        vertexesBuffer = ByteBuffer.allocateDirect(objectData.vertexes.size * BYTES_PER_FLOAT)
-            .order(ByteOrder.nativeOrder())
-            .asFloatBuffer().apply {
-                put(objectData.vertexes)
-                position(0)
-            }
-        indexesBuffer = ByteBuffer.allocateDirect(objectData.vertexIndexes.size * BYTES_PER_SHORT)
-            .order(ByteOrder.nativeOrder())
-            .asShortBuffer().apply {
-                put(objectData.vertexIndexes)
-                position(0)
-            }
+        vertexesBuffer = createFloatBuffer(objectData.vertexes)
+        normalsBuffer = createFloatBuffer(objectData.normals)
+        // texturesBuffer = createFloatBuffer(objectData.textureCoordinates)
+        indexesBuffer = createShortBuffer(objectData.vertexIndexes)
     }
 
     /**
@@ -57,18 +50,42 @@ class Torus(context: Context) : DrawObject, BindObject {
             fragmentShader = fragmentShader
         ).apply {
             linkVertexBuffer(vertexesBuffer, "position")
+            linkNormalBuffer(normalsBuffer, "a_normal")
             matrixId = getUniformId("matrix")
         }
     }
 
-    override fun draw() {
+    override fun draw(camera: Camera, light: Coordinates) = with(shader) {
         // TODO: понять, почему не работает drawElements
-        // shader.drawElements(indexesBuffer)
-        shader.drawArrays(vertexesBuffer)
+        // drawElements(indexesBuffer)
+        drawArrays(vertexesBuffer)
+        linkCamera(camera, "u_camera")
+        linkLightSource(light, "u_light")
     }
 
     override fun bindMatrix(matrix: FloatArray) {
         shader.bindUniformMatrix4fv(matrixId, matrix)
+    }
+
+    private fun createFloatBuffer(array: FloatArray): FloatBuffer {
+        return createByteBuffer(array.size * BYTES_PER_FLOAT)
+            .asFloatBuffer().apply {
+                put(array)
+                position(0)
+            }
+    }
+
+    private fun createShortBuffer(array: ShortArray): ShortBuffer {
+        return createByteBuffer(array.size * BYTES_PER_SHORT)
+            .asShortBuffer().apply {
+                put(array)
+                position(0)
+            }
+    }
+
+    private fun createByteBuffer(size: Int): ByteBuffer {
+        return ByteBuffer.allocateDirect(size)
+            .order(ByteOrder.nativeOrder())
     }
 
     private companion object {
