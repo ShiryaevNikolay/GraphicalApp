@@ -28,6 +28,13 @@ class Shader(
         linkBuffer(vertexBuffer, attribute, 3)
     }
 
+    fun linkTextureCoordsBuffer(
+        textureCoordsBuffer: FloatBuffer,
+        attribute: String
+    ) = withCurrentProgram {
+        linkBuffer(textureCoordsBuffer, attribute, 2)
+    }
+
     /**
      * Связывает буфер координат векторов нормалей с аттрибутом
      *
@@ -73,6 +80,18 @@ class Shader(
         matrix: FloatArray
     ) = withCurrentProgram {
         GLES20.glUniformMatrix4fv(objectMatrixId, 1, false, matrix, 0)
+    }
+
+    fun bindTexture(
+        textureId: Int,
+        uniform: String
+    ) = withCurrentProgram {
+        val uniformId = GLES20.glGetUniformLocation(programId, uniform)
+        // помещаем текстуру в target 2D юнита 0
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
+        // юнит текстуры
+        GLES20.glUniform1i(uniformId, 0)
     }
 
     fun drawElements(indexesBuffer: ShortBuffer) {

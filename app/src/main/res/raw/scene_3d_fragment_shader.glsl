@@ -2,9 +2,11 @@ precision mediump float;
 
 uniform vec3 u_camera;
 uniform vec3 u_light;
+uniform sampler2D u_texture;
 
 varying vec3 v_vertex;
 varying vec3 v_normal;
+varying vec2 v_texture_coords;
 
 void main() {
 
@@ -21,5 +23,5 @@ void main() {
     vec4 one = vec4(1.0, 1.0, 1.0, 1.0);
 
     vec4 color = vec4(1, 0.5, 0, 1.0);
-    gl_FragColor = 2.0 * (ambient + diffuse + specular) * color * one;
+    gl_FragColor = 2.0 * (ambient + diffuse + specular) * texture2D(u_texture, v_texture_coords) * one;
 }

@@ -8,6 +8,7 @@ import io.medicalvoice.graphicalapp.scene_3d.data.Camera
 import io.medicalvoice.graphicalapp.scene_3d.data.Coordinates
 import io.medicalvoice.graphicalapp.scene_3d.data.ObjectData
 import io.medicalvoice.graphicalapp.scene_3d.tools.ObjectLoader
+import io.medicalvoice.graphicalapp.scene_3d.tools.TextureLoader
 import io.medicalvoice.graphicalapp.utils.FileUtils
 import java.nio.*
 
@@ -17,20 +18,23 @@ class Torus(context: Context) : DrawObject, BindObject {
 
     private val vertexesBuffer: FloatBuffer
     private val normalsBuffer: FloatBuffer
-    // private val texturesBuffer: FloatBuffer
+    private val texturesBuffer: FloatBuffer
     private val indexesBuffer: ShortBuffer
 
     private val shader: Shader
 
     private val matrixId: Int
+    private val textureId: Int
 
     init {
         objectData = ObjectLoader(context, "torus.obj").getData()
 
         vertexesBuffer = createFloatBuffer(objectData.vertexes)
         normalsBuffer = createFloatBuffer(objectData.normals)
-        // texturesBuffer = createFloatBuffer(objectData.textureCoordinates)
+        texturesBuffer = createFloatBuffer(objectData.textureCoordinates)
         indexesBuffer = createShortBuffer(objectData.vertexIndexes)
+
+        textureId = TextureLoader.load(context, R.drawable.brick_wall)
     }
 
     /**
@@ -51,6 +55,8 @@ class Torus(context: Context) : DrawObject, BindObject {
         ).apply {
             linkVertexBuffer(vertexesBuffer, "position")
             linkNormalBuffer(normalsBuffer, "a_normal")
+            linkTextureCoordsBuffer(texturesBuffer, "a_texture_coords")
+            bindTexture(textureId, "u_texture")
             matrixId = getUniformId("matrix")
         }
     }
