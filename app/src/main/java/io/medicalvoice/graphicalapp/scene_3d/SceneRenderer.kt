@@ -24,11 +24,11 @@ class SceneRenderer(private val context: Context) : Renderer {
     private val viewModelMatrix = FloatArray(MATRIX_SIZE)
 
     private val camera = Camera(
-        position = Coordinates(0.0f, 1.0f, 4.0f),
-        targetLook = Coordinates(0.0f, 1.0f, 0.0f),
+        position = Coordinates(0.0f, 2.0f, 7.0f),
+        targetLook = Coordinates(0.0f, 2.0f, 0.0f),
         rotate = Angle(0.0f, 1.0f, 0.0f)
     )
-    private val light = Coordinates(1.0f, 1.0f, 1.0f)
+    private val light = Coordinates(3.0f, 3.0f, 4.0f)
 
     private var scene: Scene? = null
 

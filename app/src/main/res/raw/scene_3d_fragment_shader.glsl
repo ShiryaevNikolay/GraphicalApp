@@ -19,7 +19,7 @@ void main() {
     float k_specular = 0.2;
     float diffuse = k_diffuse * max(dot(n_normal, light_vector), 0.0);
     vec3 reflect_vector = reflect(-light_vector, n_normal);
-    float specular = k_specular * pow(max(dot(light_vector, reflect_vector), 0.0), 40.0);
+    float specular = k_specular * pow(max(dot(look_vector, reflect_vector), 0.0), 40.0);
     vec4 one = vec4(1.0, 1.0, 1.0, 1.0);
 
     vec4 color = vec4(1, 0.5, 0, 1.0);

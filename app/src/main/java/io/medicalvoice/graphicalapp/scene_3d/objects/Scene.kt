@@ -1,11 +1,9 @@
 package io.medicalvoice.graphicalapp.scene_3d.objects
 
 import android.content.Context
-import android.opengl.GLES20
 import io.medicalvoice.graphicalapp.R
 import io.medicalvoice.graphicalapp.scene_3d.data.Camera
 import io.medicalvoice.graphicalapp.scene_3d.data.Coordinates
-import io.medicalvoice.graphicalapp.scene_3d.data.TextureData
 import io.medicalvoice.graphicalapp.scene_3d.tools.SceneLoader
 
 class Scene(context: Context) {
@@ -14,13 +12,14 @@ class Scene(context: Context) {
 
     init {
         val textures = listOf(
-            R.drawable.tex_ground,
-            R.drawable.shingles_1,
-            R.drawable.shingles_2,
-            R.drawable.shingles_3,
-            R.drawable.shingles_4,
-            R.drawable.shingles_5,
-            R.drawable.shingles_6
+            R.drawable.wallpaper,
+            R.drawable.back1,
+            R.drawable.top3,
+            R.drawable.right5,
+            R.drawable.left4,
+            R.drawable.texture2,
+            R.drawable.shingles_6,
+            R.drawable.texture_1
         )
 
         val sceneLoader = SceneLoader(context, "scene.obj")

@@ -7,13 +7,11 @@ import io.medicalvoice.graphicalapp.scene_3d.Shader
 import io.medicalvoice.graphicalapp.scene_3d.data.Camera
 import io.medicalvoice.graphicalapp.scene_3d.data.Coordinates
 import io.medicalvoice.graphicalapp.scene_3d.data.ObjectData
-import io.medicalvoice.graphicalapp.scene_3d.data.TextureData
 import io.medicalvoice.graphicalapp.scene_3d.tools.TextureLoader
 import io.medicalvoice.graphicalapp.utils.FileUtils
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
-import java.nio.ShortBuffer
 
 class VisualObject(
     context: Context,
