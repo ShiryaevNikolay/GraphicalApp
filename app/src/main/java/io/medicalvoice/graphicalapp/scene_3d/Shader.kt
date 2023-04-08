@@ -1,6 +1,8 @@
 package io.medicalvoice.graphicalapp.scene_3d
 
+import android.graphics.Bitmap
 import android.opengl.GLES20
+import android.opengl.GLUtils
 import io.medicalvoice.graphicalapp.scene_3d.data.Camera
 import io.medicalvoice.graphicalapp.scene_3d.data.Coordinates
 import java.nio.Buffer
@@ -82,24 +84,53 @@ class Shader(
         GLES20.glUniformMatrix4fv(objectMatrixId, 1, false, matrix, 0)
     }
 
-    fun bindTexture(
-        textureId: Int,
-        uniform: String
-    ) = withCurrentProgram {
-        val uniformId = GLES20.glGetUniformLocation(programId, uniform)
-        // помещаем текстуру в target 2D юнита 0
+    fun loadTexture(bitmap: Bitmap): Int = withCurrentProgram {
+        val textureIds = IntArray(1)
+        val textureIndex = 0
+        GLES20.glGenTextures(textureIds.size, textureIds, textureIndex) // 0 - индекс в массиве
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
-        // юнит текстуры
-        GLES20.glUniform1i(uniformId, 0)
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureIds[textureIndex])
+
+        GLES20.glTexParameteri(
+            GLES20.GL_TEXTURE_2D,
+            GLES20.GL_TEXTURE_MIN_FILTER,
+            GLES20.GL_LINEAR
+        )
+        GLES20.glTexParameteri(
+            GLES20.GL_TEXTURE_2D,
+            GLES20.GL_TEXTURE_MAG_FILTER,
+            GLES20.GL_LINEAR
+        )
+        // GLES20.glTexParameteri(
+        //     GLES20.GL_TEXTURE_2D,
+        //     GLES20.GL_TEXTURE_WRAP_S,
+        //     GLES20.GL_CLAMP_TO_EDGE
+        // )
+        // GLES20.glTexParameteri(
+        //     GLES20.GL_TEXTURE_2D,
+        //     GLES20.GL_TEXTURE_WRAP_T,
+        //     GLES20.GL_CLAMP_TO_EDGE
+        // )
+
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0)
+
+        bitmap.recycle()
+
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
+
+        return@withCurrentProgram textureIds[textureIndex]
     }
 
-    fun drawElements(indexesBuffer: ShortBuffer) {
-        drawElements(
-            mode = GLES20.GL_TRIANGLES,
-            type = GLES20.GL_UNSIGNED_SHORT,
-            indexesBuffer = indexesBuffer
-        )
+    fun bindTexture(
+        textureIndex: Int,
+        uniform: String
+    ) = withCurrentProgram {
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureIndex)
+
+        val uniformId = GLES20.glGetUniformLocation(programId, uniform)
+        // юнит текстуры
+        GLES20.glUniform1i(uniformId, 0)
     }
 
     fun drawArrays(vertexes: FloatBuffer) = withCurrentProgram {
@@ -107,15 +138,6 @@ class Shader(
             GLES20.GL_TRIANGLES,
             0,
             vertexes.limit() / 3 // Нужно делить на 3, т.к. вертекс состоит из 3 элементов: https://gamedev.stackexchange.com/questions/85924/obj-model-not-being-rendered-properly-in-opengl-es-2-android-app
-        )
-    }
-
-    private fun drawElements(mode: Int, type: Int, indexesBuffer: Buffer) = withCurrentProgram {
-        GLES20.glDrawElements(
-            mode,
-            indexesBuffer.limit(),
-            type,
-            indexesBuffer
         )
     }
 

@@ -15,8 +15,8 @@ void main() {
     vec3 look_vector = normalize(u_camera - v_vertex);
 
     float ambient = 0.2;
-    float k_diffuse = 0.8;
-    float k_specular = 0.4;
+    float k_diffuse = 0.4;
+    float k_specular = 0.2;
     float diffuse = k_diffuse * max(dot(n_normal, light_vector), 0.0);
     vec3 reflect_vector = reflect(-light_vector, n_normal);
     float specular = k_specular * pow(max(dot(light_vector, reflect_vector), 0.0), 40.0);

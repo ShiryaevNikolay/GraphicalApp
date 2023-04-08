@@ -1,45 +1,42 @@
 package io.medicalvoice.graphicalapp.scene_3d.objects
 
 import android.content.Context
-import android.opengl.GLES20
+import androidx.annotation.DrawableRes
 import io.medicalvoice.graphicalapp.R
 import io.medicalvoice.graphicalapp.scene_3d.Shader
 import io.medicalvoice.graphicalapp.scene_3d.data.Camera
 import io.medicalvoice.graphicalapp.scene_3d.data.Coordinates
 import io.medicalvoice.graphicalapp.scene_3d.data.ObjectData
-import io.medicalvoice.graphicalapp.scene_3d.tools.ObjectLoader
+import io.medicalvoice.graphicalapp.scene_3d.data.TextureData
 import io.medicalvoice.graphicalapp.scene_3d.tools.TextureLoader
 import io.medicalvoice.graphicalapp.utils.FileUtils
-import java.nio.*
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.nio.FloatBuffer
+import java.nio.ShortBuffer
 
-class Torus(context: Context) : DrawObject, BindObject {
-
-    private val objectData: ObjectData
+class VisualObject(
+    context: Context,
+    objectData: ObjectData,
+    @DrawableRes textureRes: Int
+) {
 
     private val vertexesBuffer: FloatBuffer
     private val normalsBuffer: FloatBuffer
     private val texturesBuffer: FloatBuffer
-    private val indexesBuffer: ShortBuffer
+
+    private val viewModelProjectionMatrixId: Int
 
     private val shader: Shader
 
-    private val matrixId: Int
     private val textureId: Int
 
     init {
-        objectData = ObjectLoader(context, "torus.obj").getData()
-
         vertexesBuffer = createFloatBuffer(objectData.vertexes)
         normalsBuffer = createFloatBuffer(objectData.normals)
         texturesBuffer = createFloatBuffer(objectData.textureCoordinates)
-        indexesBuffer = createShortBuffer(objectData.vertexIndexes)
-
-        textureId = TextureLoader.load(context, R.drawable.brick_wall)
     }
 
-    /**
-     * Инициализирует шейдер
-     */
     init {
         val vertexShader = FileUtils.readTextFromRaw(
             context,
@@ -49,41 +46,40 @@ class Torus(context: Context) : DrawObject, BindObject {
             context,
             R.raw.scene_3d_fragment_shader
         )
-        shader = Shader(
-            vertexShader = vertexShader,
-            fragmentShader = fragmentShader
-        ).apply {
+        shader = Shader(vertexShader, fragmentShader).apply {
+            viewModelProjectionMatrixId = getUniformId("matrix")
+
             linkVertexBuffer(vertexesBuffer, "position")
             linkNormalBuffer(normalsBuffer, "a_normal")
             linkTextureCoordsBuffer(texturesBuffer, "a_texture_coords")
-            bindTexture(textureId, "u_texture")
-            matrixId = getUniformId("matrix")
+
+            val textureBitmap = TextureLoader.load(context, textureRes)
+            textureId = loadTexture(textureBitmap)
+            // bindTexture(textureBitmap, "u_texture")
         }
     }
 
-    override fun draw(camera: Camera, light: Coordinates) = with(shader) {
-        // TODO: понять, почему не работает drawElements
-        // drawElements(indexesBuffer)
-        drawArrays(vertexesBuffer)
-        linkCamera(camera, "u_camera")
-        linkLightSource(light, "u_light")
+    fun bindMatrix(matrix: FloatArray) {
+        shader.bindUniformMatrix4fv(viewModelProjectionMatrixId, matrix)
     }
 
-    override fun bindMatrix(matrix: FloatArray) {
-        shader.bindUniformMatrix4fv(matrixId, matrix)
+    fun draw(camera: Camera, light: Coordinates) = with(shader) {
+        linkBuffers()
+        linkCamera(camera, "u_camera")
+        linkLightSource(light, "u_light")
+        bindTexture(textureId, "u_texture")
+        drawArrays(vertexesBuffer)
+    }
+
+    private fun Shader.linkBuffers() {
+        linkVertexBuffer(vertexesBuffer, "position")
+        linkNormalBuffer(normalsBuffer, "a_normal")
+        linkTextureCoordsBuffer(texturesBuffer, "a_texture_coords")
     }
 
     private fun createFloatBuffer(array: FloatArray): FloatBuffer {
         return createByteBuffer(array.size * BYTES_PER_FLOAT)
             .asFloatBuffer().apply {
-                put(array)
-                position(0)
-            }
-    }
-
-    private fun createShortBuffer(array: ShortArray): ShortBuffer {
-        return createByteBuffer(array.size * BYTES_PER_SHORT)
-            .asShortBuffer().apply {
                 put(array)
                 position(0)
             }

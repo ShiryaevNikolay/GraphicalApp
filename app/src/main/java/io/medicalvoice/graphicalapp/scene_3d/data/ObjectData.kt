@@ -9,8 +9,8 @@ package io.medicalvoice.graphicalapp.scene_3d.data
  * @property vertexIndexes массив индексов для вертексов
  */
 class ObjectData(
+    val name: String = "", // TODO: убрать инициализатор
     val vertexes: FloatArray,
     val textureCoordinates: FloatArray,
-    val normals: FloatArray,
-    val vertexIndexes: ShortArray
+    val normals: FloatArray
 )
