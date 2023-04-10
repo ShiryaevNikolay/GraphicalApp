@@ -13,4 +13,4 @@
 
 Скриншот экрана из пакета `scene_3d`. Можно загружать любую сцену формата `.obj`.
 
-<img src="https://github.com/ShiryaevNikolay/GraphicalApp/blob/scene_3d/preview/Screenshot_1680969785.png" width="300">
+<img src="https://github.com/ShiryaevNikolay/GraphicalApp/blob/main/preview/Screenshot_1680969785.png" width="300">
